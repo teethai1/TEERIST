@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+import 'package:teerist/Models/user_model.dart';
+import 'package:teerist/screens/my_alert.dart';
+import 'package:teerist/screens/my_service.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -26,7 +29,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Future<void> readQrCode() async { 
+  Future<void> readQrCode() async {
     try {
       resultCode = await BarcodeScanner.scan();
       print('resultCode = $resultCode');
@@ -34,15 +37,33 @@ class _HomeState extends State<Home> {
     } catch (e) {}
   }
 
-  Future<void> getUserWhereResultCode()async{
+  Future<void> getUserWhereResultCode() async {
     print('work');
-    String urlAPI = 'http://10.28.50.26/getUserWhereResultTeeThai.php?isAdd=true&ResultCode=$resultCode';
+    String urlAPI =
+        'http://10.28.50.26/getUserWhereResultTeeThai.php?isAdd=true&ResultCode=$resultCode';
     Response response = await get(urlAPI);
     print('======================response= $response');
     var result = json.decode(response.body);
     print('result ================================>>>>>>>>>>>>>>>>>> $result');
+    if (result.toString() == 'null') {
+      normalDialog('Result False', 'No $resultCode in my database', context);
+    } else {
+      //เราจะต้องส่งข้อมูลเป็น Model ไปอีก ฟอร์มนึง
+      for (var map in result) {
+        UserModel userModel = UserModel.fromJson(map);
+        MaterialPageRoute materialPageRoute =
+            MaterialPageRoute(builder: (BuildContext context) {
+          return MyService(
+            userModel: userModel,
+          );
+        }); //เป็นการสั่งให้คลาสอื่นทำงาน
+        Navigator.of(context).pushAndRemoveUntil(materialPageRoute,
+            (Route<dynamic> route) {
+          return false;
+        }); //ย้อน
+      }
+    }
   }
-
 
   Widget showLogo() {
     return Container(
