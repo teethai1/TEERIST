@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -18,16 +21,28 @@ class _HomeState extends State<Home> {
       onPressed: () {
         print('You click authen');
         readQrCode();
+        // getUserWhereResultCode();
       },
     );
   }
 
-  Future<void> readQrCode() async {
+  Future<void> readQrCode() async { 
     try {
       resultCode = await BarcodeScanner.scan();
       print('resultCode = $resultCode');
+      getUserWhereResultCode();
     } catch (e) {}
   }
+
+  Future<void> getUserWhereResultCode()async{
+    print('work');
+    String urlAPI = 'http://10.28.50.26/getUserWhereResultTeeThai.php?isAdd=true&ResultCode=$resultCode';
+    Response response = await get(urlAPI);
+    print('======================response= $response');
+    var result = json.decode(response.body);
+    print('result ================================>>>>>>>>>>>>>>>>>> $result');
+  }
+
 
   Widget showLogo() {
     return Container(
